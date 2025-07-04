@@ -1,13 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerFooter,
-  DrawerClose
-} from '@/components/ui/drawer'
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card'
 
 const COLORS = [
   '#FFFFFF',
@@ -332,7 +331,7 @@ const Canvas: React.FC = () => {
           zIndex: 10
         }}
       >
-        {!isPlacing && (
+        {!isPlacing && !showColorPicker && (
           <Button onClick={() => setIsPlacing(true)}>Place Pixel</Button>
         )}
         {isPlacing && (
@@ -342,18 +341,26 @@ const Canvas: React.FC = () => {
         )}
       </div>
 
-      <Drawer open={showColorPicker} onOpenChange={setShowColorPicker}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>Select a color</DrawerTitle>
-          </DrawerHeader>
-          <div style={{ padding: '0 20px 20px' }}>
+      {showColorPicker && selectedPixel && (
+        <Card
+          style={{
+            position: 'absolute',
+            bottom: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 20,
+            width: '250px'
+          }}
+        >
+          <CardHeader>
+            <CardTitle>Select a color</CardTitle>
+          </CardHeader>
+          <CardContent>
             <div
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: '10px',
-                margin: '10px 0'
+                gap: '10px'
               }}
             >
               {COLORS.map(color => (
@@ -374,17 +381,15 @@ const Canvas: React.FC = () => {
                 />
               ))}
             </div>
-          </div>
-          <DrawerFooter>
+          </CardContent>
+          <CardFooter style={{ justifyContent: 'space-between' }}>
             <Button onClick={handlePlacePixel}>Confirm</Button>
-            <DrawerClose asChild>
-              <Button variant='outline' onClick={handleCancelPlacement}>
-                Cancel
-              </Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
+            <Button variant='outline' onClick={handleCancelPlacement}>
+              Cancel
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
     </div>
   )
 }
