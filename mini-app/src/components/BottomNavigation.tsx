@@ -1,5 +1,5 @@
 import { Link, useRouterState } from '@tanstack/react-router'
-import { Home, Plus, User } from 'lucide-react'
+import { Home, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -23,23 +23,7 @@ export function BottomNavigation () {
               })}
             />
           </Button>
-          <span className='text-xs text-muted-foreground'>Streams</span>
-        </Link>
-        <Link to='/add' className='flex flex-col items-center'>
-          <Button
-            variant='ghost'
-            className={cn('h-auto rounded-full p-3', {
-              'bg-muted': location.pathname === '/add'
-            })}
-          >
-            <Plus
-              className={cn('h-6 w-6', {
-                'text-foreground': location.pathname === '/add',
-                'text-muted-foreground': location.pathname !== '/add'
-              })}
-            />
-          </Button>
-          <span className='text-xs text-muted-foreground'>Add</span>
+          <span className='text-xs text-muted-foreground'>Canvas</span>
         </Link>
         <Link to='/profile' className='flex flex-col items-center'>
           <Button
