@@ -17,7 +17,6 @@ import { Route as LoginImport } from './routes/login'
 import { Route as ErrorImport } from './routes/error'
 import { Route as AddImport } from './routes/add'
 import { Route as IndexImport } from './routes/index'
-import { Route as LiveIdImport } from './routes/live/$id'
 
 // Create/Update Routes
 
@@ -54,12 +53,6 @@ const AddRoute = AddImport.update({
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const LiveIdRoute = LiveIdImport.update({
-  id: '/live/$id',
-  path: '/live/$id',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -109,13 +102,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileImport
       parentRoute: typeof rootRoute
     }
-    '/live/$id': {
-      id: '/live/$id'
-      path: '/live/$id'
-      fullPath: '/live/$id'
-      preLoaderRoute: typeof LiveIdImport
-      parentRoute: typeof rootRoute
-    }
   }
 }
 
@@ -128,7 +114,6 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/not-found': typeof NotFoundRoute
   '/profile': typeof ProfileRoute
-  '/live/$id': typeof LiveIdRoute
 }
 
 export interface FileRoutesByTo {
@@ -138,7 +123,6 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/not-found': typeof NotFoundRoute
   '/profile': typeof ProfileRoute
-  '/live/$id': typeof LiveIdRoute
 }
 
 export interface FileRoutesById {
@@ -149,28 +133,13 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/not-found': typeof NotFoundRoute
   '/profile': typeof ProfileRoute
-  '/live/$id': typeof LiveIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/add'
-    | '/error'
-    | '/login'
-    | '/not-found'
-    | '/profile'
-    | '/live/$id'
+  fullPaths: '/' | '/add' | '/error' | '/login' | '/not-found' | '/profile'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/add'
-    | '/error'
-    | '/login'
-    | '/not-found'
-    | '/profile'
-    | '/live/$id'
+  to: '/' | '/add' | '/error' | '/login' | '/not-found' | '/profile'
   id:
     | '__root__'
     | '/'
@@ -179,7 +148,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/not-found'
     | '/profile'
-    | '/live/$id'
   fileRoutesById: FileRoutesById
 }
 
@@ -190,7 +158,6 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   NotFoundRoute: typeof NotFoundRoute
   ProfileRoute: typeof ProfileRoute
-  LiveIdRoute: typeof LiveIdRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -200,7 +167,6 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   NotFoundRoute: NotFoundRoute,
   ProfileRoute: ProfileRoute,
-  LiveIdRoute: LiveIdRoute,
 }
 
 export const routeTree = rootRoute
@@ -218,8 +184,7 @@ export const routeTree = rootRoute
         "/error",
         "/login",
         "/not-found",
-        "/profile",
-        "/live/$id"
+        "/profile"
       ]
     },
     "/": {
@@ -239,9 +204,6 @@ export const routeTree = rootRoute
     },
     "/profile": {
       "filePath": "profile.tsx"
-    },
-    "/live/$id": {
-      "filePath": "live/$id.tsx"
     }
   }
 }
