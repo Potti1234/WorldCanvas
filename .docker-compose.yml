@@ -1,0 +1,52 @@
+services:
+  backend:
+    image: 'ghcr.io/get-convex/convex-backend:5143fec81f146ca67495c12c6b7a15c5802c37e2'
+    volumes:
+      - 'data:/convex/data'
+    environment:
+      - SERVICE_FQDN_BACKEND_3210
+      - 'INSTANCE_NAME=${INSTANCE_NAME:-self-hosted-convex}'
+      - 'INSTANCE_SECRET=${SERVICE_HEX_32_SECRET}'
+      - 'CONVEX_RELEASE_VERSION_DEV=${CONVEX_RELEASE_VERSION_DEV:-}'
+      - 'ACTIONS_USER_TIMEOUT_SECS=${ACTIONS_USER_TIMEOUT_SECS:-}'
+      - 'CONVEX_CLOUD_ORIGIN=${SERVICE_FQDN_CONVEX_3210}'
+      - 'CONVEX_SITE_ORIGIN=${SERVICE_FQDN_CONVEX_3211}'
+      - 'DATABASE_URL=${DATABASE_URL:-}'
+      - 'DISABLE_BEACON=${DISABLE_BEACON:-}'
+      - 'REDACT_LOGS_TO_CLIENT=${REDACT_LOGS_TO_CLIENT:-}'
+      - 'CONVEX_SELF_HOSTED_URL=${SERVICE_FQDN_CONVEX_6791}'
+    healthcheck:
+      test: 'curl -f http://127.0.0.1:3210/version'
+      interval: 5s
+      start_period: 5s
+    labels:
+      - "traefik.enable=true"
+      # WebSocket Router: Matches the host BUT NOT the /http path.
+      - "traefik.http.routers.convex-ws.rule=Host(`${SERVICE_FQDN_CONVEX_3210}`) && !PathPrefix(`/http`)"
+      - "traefik.http.routers.convex-ws.entrypoints=websecure"
+      - "traefik.http.routers.convex-ws.tls=true"
+      - "traefik.http.routers.convex-ws.service=convex-ws-service"
+      - "traefik.http.services.convex-ws-service.loadbalancer.server.port=3210"
+
+      # HTTP Actions Router: Matches the host AND the /http path.
+      - "traefik.http.routers.convex-http.rule=Host(`${SERVICE_FQDN_CONVEX_3210}`) && PathPrefix(`/http`)"
+      - "traefik.http.routers.convex-http.entrypoints=websecure"
+      - "traefik.http.routers.convex-http.tls=true"
+      - "traefik.http.routers.convex-http.service=convex-http-service"
+      - "traefik.http.services.convex-http-service.loadbalancer.server.port=3211"
+
+      # Temporarily disabling the middleware for this test.
+      # - "traefik.http.routers.convex-http.middlewares=strip-http-prefix"
+      # - "traefik.http.middlewares.strip-http-prefix.stripprefix.prefixes=/http"
+  dashboard:
+    image: 'ghcr.io/get-convex/convex-dashboard:5143fec81f146ca67495c12c6b7a15c5802c37e2'
+    environment:
+      - SERVICE_FQDN_CONVEX_6791
+      - NEXT_PUBLIC_DEPLOYMENT_URL=$SERVICE_FQDN_BACKEND_3210
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: 'wget -qO- http://127.0.0.1:6791/'
+      interval: 5s
+      start_period: 5s
