@@ -1,4 +1,32 @@
 import React, { useRef, useEffect, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerFooter,
+  DrawerClose
+} from '@/components/ui/drawer'
+
+const COLORS = [
+  '#FFFFFF',
+  '#C2C2C2',
+  '#858585',
+  '#474747',
+  '#000000',
+  '#362B23',
+  '#7A4F33',
+  '#E6A824',
+  '#F3D49C',
+  '#F8C3B8',
+  '#E64A3E',
+  '#9C273E',
+  '#6A329C',
+  '#32329C',
+  '#3E4A9C',
+  '#279C9C'
+]
 
 const Canvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -8,6 +36,14 @@ const Canvas: React.FC = () => {
   const [startPan, setStartPan] = useState({ x: 0, y: 0 })
   const [isPinching, setIsPinching] = useState(false)
   const [startPinchDist, setStartPinchDist] = useState(0)
+  const [pixels, setPixels] = useState<Map<string, string>>(new Map())
+  const [isPlacing, setIsPlacing] = useState(false)
+  const [showColorPicker, setShowColorPicker] = useState(false)
+  const [selectedPixel, setSelectedPixel] = useState<{
+    x: number
+    y: number
+  } | null>(null)
+  const [selectedColor, setSelectedColor] = useState<string>(COLORS[0])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -90,10 +126,40 @@ const Canvas: React.FC = () => {
         }
       }
 
+      pixels.forEach((color, key) => {
+        const [x, y] = key.split(',').map(Number)
+        ctx.fillStyle = color
+        ctx.fillRect(x, y, 1, 1)
+      })
+
+      if (showColorPicker && selectedPixel) {
+        ctx.fillStyle = selectedColor
+        ctx.globalAlpha = 0.7
+        ctx.fillRect(selectedPixel.x, selectedPixel.y, 1, 1)
+        ctx.globalAlpha = 1.0
+      }
+
       ctx.restore()
     }
 
     draw()
+
+    const handleCanvasClick = (e: MouseEvent) => {
+      if (!isPlacing || scale <= 5 || !canvas) return
+
+      const rect = canvas.getBoundingClientRect()
+      const mouseX = e.clientX - rect.left
+      const mouseY = e.clientY - rect.top
+
+      const canvasX = Math.floor((mouseX - pan.x) / scale)
+      const canvasY = Math.floor((mouseY - pan.y) / scale)
+
+      if (canvasX >= 0 && canvasX < 1000 && canvasY >= 0 && canvasY < 1000) {
+        setSelectedPixel({ x: canvasX, y: canvasY })
+        setShowColorPicker(true)
+        setIsPlacing(false)
+      }
+    }
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault()
@@ -195,6 +261,7 @@ const Canvas: React.FC = () => {
       }
     }
 
+    canvas.addEventListener('click', handleCanvasClick)
     canvas.addEventListener('wheel', handleWheel)
     canvas.addEventListener('mousedown', handleMouseDown)
     canvas.addEventListener('mousemove', handleMouseMove)
@@ -206,6 +273,7 @@ const Canvas: React.FC = () => {
     window.addEventListener('resize', handleResize)
 
     return () => {
+      canvas.removeEventListener('click', handleCanvasClick)
       canvas.removeEventListener('wheel', handleWheel)
       canvas.removeEventListener('mousedown', handleMouseDown)
       canvas.removeEventListener('mousemove', handleMouseMove)
@@ -216,9 +284,109 @@ const Canvas: React.FC = () => {
       canvas.removeEventListener('touchend', handleTouchEnd)
       window.removeEventListener('resize', handleResize)
     }
-  }, [scale, pan, isPanning, startPan, isPinching, startPinchDist])
+  }, [
+    scale,
+    pan,
+    isPanning,
+    startPan,
+    isPinching,
+    startPinchDist,
+    pixels,
+    isPlacing,
+    showColorPicker,
+    selectedPixel,
+    selectedColor
+  ])
 
-  return <canvas ref={canvasRef} style={{ display: 'block' }} />
+  const handlePlacePixel = () => {
+    if (selectedPixel) {
+      const newPixels = new Map(pixels)
+      newPixels.set(`${selectedPixel.x},${selectedPixel.y}`, selectedColor)
+      setPixels(newPixels)
+      setShowColorPicker(false)
+      setSelectedPixel(null)
+    }
+  }
+
+  const handleCancelPlacement = () => {
+    setShowColorPicker(false)
+    setSelectedPixel(null)
+  }
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        width: '100vw',
+        height: '100vh',
+        overflow: 'hidden'
+      }}
+    >
+      <canvas ref={canvasRef} style={{ display: 'block' }} />
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 10
+        }}
+      >
+        {!isPlacing && (
+          <Button onClick={() => setIsPlacing(true)}>Place Pixel</Button>
+        )}
+        {isPlacing && (
+          <Button onClick={() => setIsPlacing(false)} variant='destructive'>
+            Cancel Pixel Placing
+          </Button>
+        )}
+      </div>
+
+      <Drawer open={showColorPicker} onOpenChange={setShowColorPicker}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Select a color</DrawerTitle>
+          </DrawerHeader>
+          <div style={{ padding: '0 20px 20px' }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '10px',
+                margin: '10px 0'
+              }}
+            >
+              {COLORS.map(color => (
+                <div
+                  key={color}
+                  onClick={() => setSelectedColor(color)}
+                  style={{
+                    width: '100%',
+                    paddingBottom: '100%',
+                    backgroundColor: color,
+                    cursor: 'pointer',
+                    border:
+                      selectedColor === color
+                        ? '3px solid blue'
+                        : '1px solid #ccc',
+                    borderRadius: '4px'
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+          <DrawerFooter>
+            <Button onClick={handlePlacePixel}>Confirm</Button>
+            <DrawerClose asChild>
+              <Button variant='outline' onClick={handleCancelPlacement}>
+                Cancel
+              </Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+    </div>
+  )
 }
 
 export default Canvas
