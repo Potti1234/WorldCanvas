@@ -18,6 +18,33 @@ const Canvas: React.FC = () => {
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
 
+    const clampPan = (pan: { x: number; y: number }, scale: number) => {
+      if (!canvas) return pan
+      const vw = canvas.width
+      const vh = canvas.height
+
+      let minX, maxX, minY, maxY
+
+      if (2000 * scale < vw) {
+        minX = maxX = (vw - 1000 * scale) / 2
+      } else {
+        minX = vw - 1500 * scale
+        maxX = 500 * scale
+      }
+
+      if (2000 * scale < vh) {
+        minY = maxY = (vh - 1000 * scale) / 2
+      } else {
+        minY = vh - 1500 * scale
+        maxY = 500 * scale
+      }
+
+      return {
+        x: Math.max(minX, Math.min(maxX, pan.x)),
+        y: Math.max(minY, Math.min(maxY, pan.y))
+      }
+    }
+
     const draw = () => {
       if (!canvas || !ctx) return
       ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -70,18 +97,20 @@ const Canvas: React.FC = () => {
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault()
+      const minScale = Math.min(canvas.width, canvas.height) / 2000
       const zoom = 1 - e.deltaY * 0.001
+      const newScale = Math.max(minScale, scale * zoom)
+      const actualZoom = newScale / scale
       const rect = canvas.getBoundingClientRect()
       const mouseX = e.clientX - rect.left
       const mouseY = e.clientY - rect.top
 
-      const newScale = scale * zoom
       const newPan = {
-        x: mouseX - (mouseX - pan.x) * zoom,
-        y: mouseY - (mouseY - pan.y) * zoom
+        x: mouseX - (mouseX - pan.x) * actualZoom,
+        y: mouseY - (mouseY - pan.y) * actualZoom
       }
       setScale(newScale)
-      setPan(newPan)
+      setPan(clampPan(newPan, newScale))
     }
 
     const handleMouseDown = (e: MouseEvent) => {
@@ -91,10 +120,11 @@ const Canvas: React.FC = () => {
 
     const handleMouseMove = (e: MouseEvent) => {
       if (isPanning) {
-        setPan({
+        const newPan = {
           x: e.clientX - startPan.x,
           y: e.clientY - startPan.y
-        })
+        }
+        setPan(clampPan(newPan, scale))
       }
     }
 
@@ -121,30 +151,33 @@ const Canvas: React.FC = () => {
 
     const handleTouchMove = (e: TouchEvent) => {
       if (isPanning && e.touches.length === 1) {
-        setPan({
+        const newPan = {
           x: e.touches[0].clientX - startPan.x,
           y: e.touches[0].clientY - startPan.y
-        })
+        }
+        setPan(clampPan(newPan, scale))
       } else if (isPinching && e.touches.length === 2) {
+        const minScale = Math.min(canvas.width, canvas.height) / 2000
         const dist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
         )
         const zoom = dist / startPinchDist
+        const newScale = Math.max(minScale, scale * zoom)
+        const actualZoom = newScale / scale
         const rect = canvas.getBoundingClientRect()
         const touchX =
           (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left
         const touchY =
           (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top
 
-        const newScale = scale * zoom
         const newPan = {
-          x: touchX - (touchX - pan.x) * zoom,
-          y: touchY - (touchY - pan.y) * zoom
+          x: touchX - (touchX - pan.x) * actualZoom,
+          y: touchY - (touchY - pan.y) * actualZoom
         }
 
         setScale(newScale)
-        setPan(newPan)
+        setPan(clampPan(newPan, newScale))
         setStartPinchDist(dist)
       }
     }
@@ -158,7 +191,7 @@ const Canvas: React.FC = () => {
       if (canvas) {
         canvas.width = window.innerWidth
         canvas.height = window.innerHeight
-        draw()
+        setPan(p => clampPan(p, scale))
       }
     }
 
