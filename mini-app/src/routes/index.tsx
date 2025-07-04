@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useSession } from '@/hooks/useSession'
 import { useEffect } from 'react'
+import Canvas from '@/components/Canvas'
 
 export const Route = createFileRoute('/')({
   component: RouteComponent
@@ -20,9 +21,5 @@ function RouteComponent () {
     return <div>Loading...</div>
   }
 
-  return (
-    <div>
-      <h1>Home</h1>
-    </div>
-  )
+  return <Canvas />
 }
