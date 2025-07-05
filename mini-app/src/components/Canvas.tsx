@@ -11,6 +11,10 @@ import { api } from '../../convex/_generated/api'
 import { PixelInfoCard } from './PixelInfoCard'
 import { getContrastColor } from '@/lib/color'
 import { placePixelOnContract } from '@/lib/transactions/placepixel'
+import { MiniKit } from '@worldcoin/minikit-js'
+import { SelfAppBuilder } from '@selfxyz/qrcode'
+import { getUniversalLink } from '@selfxyz/core'
+import { SelfVerifyModal } from './SelfVerifyModal'
 
 const COLORS = [
   '#FFFFFF',
@@ -53,6 +57,9 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
   const [cooldown, setCooldown] = useState(0)
   const [showPixelInfo, setShowPixelInfo] = useState<any | null>(null)
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 })
+  const [showSelfQR, setShowSelfQR] = useState(false)
+  const [selfApp, setSelfApp] = useState<any>(null)
+  const [selfQRUrl, setSelfQRUrl] = useState('')
 
   useEffect(() => {
     const updateCooldown = () => {
@@ -255,12 +262,41 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
     ) {
       setIsPlacing(true)
     } else {
-      try {
-        await handleVerify(sessionId)
-        toast.success('Verification successful')
-      } catch (error) {
-        console.error('Verification failed:', error)
-        toast.error('Verification failed')
+      if (MiniKit.isInstalled()) {
+        try {
+          await handleVerify(sessionId)
+          toast.success('Verification successful')
+        } catch (error) {
+          console.error('Verification failed:', error)
+          toast.error('Verification failed')
+        }
+      } else {
+        if (!user.walletAddress) {
+          toast.error('Wallet not connected. Please connect your wallet first.')
+          return
+        }
+        const app = new SelfAppBuilder({
+          appName: 'World Canvas',
+          scope: 'verify',
+          endpoint: '0xDB611E19303debA0C967A6f293E23Fc5D9D58513',
+          endpointType: 'celo',
+          userId: user.walletAddress,
+          userIdType: 'hex',
+          userDefinedData: 'I need to change of computer',
+          version: 2,
+          disclosures: {
+            date_of_birth: true,
+            nationality: true,
+            minimumAge: 18
+          },
+          devMode: false
+        }).build()
+
+        const url = getUniversalLink(app)
+
+        setSelfApp(app)
+        setSelfQRUrl(url)
+        setShowSelfQR(true)
       }
     }
   }
@@ -275,6 +311,22 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
       }}
     >
       <canvas ref={canvasRef} style={{ display: 'block' }} />
+      {showSelfQR && selfApp && (
+        <SelfVerifyModal
+          selfApp={selfApp}
+          qrUrl={selfQRUrl}
+          onSuccess={() => {
+            setShowSelfQR(false)
+            toast.success(
+              'Verification in progress! Please check your Self app.'
+            )
+          }}
+          onError={() => {
+            toast.error('Verification failed')
+          }}
+          onClose={() => setShowSelfQR(false)}
+        />
+      )}
       <div
         style={{
           position: 'absolute',
