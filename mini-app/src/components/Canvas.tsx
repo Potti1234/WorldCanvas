@@ -13,7 +13,6 @@ import { getContrastColor } from '@/lib/color'
 import { placePixelOnContract } from '@/lib/transactions/placepixel'
 import { MiniKit } from '@worldcoin/minikit-js'
 import { SelfAppBuilder } from '@selfxyz/qrcode'
-import { getUniversalLink } from '@selfxyz/core'
 import { SelfVerifyModal } from './SelfVerifyModal'
 
 const COLORS = [
@@ -62,7 +61,7 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 })
   const [showSelfQR, setShowSelfQR] = useState(false)
   const [selfApp, setSelfApp] = useState<any>(null)
-  const [selfQRUrl, setSelfQRUrl] = useState('')
+  //const [selfQRUrl, setSelfQRUrl] = useState('')
 
   useEffect(() => {
     const updateCooldown = () => {
@@ -295,10 +294,10 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
           devMode: false
         }).build()
 
-        const url = getUniversalLink(app)
+        //const url = getUniversalLink(app)
 
         setSelfApp(app)
-        setSelfQRUrl(url)
+        //setSelfQRUrl(url)
         setShowSelfQR(true)
       }
     }
@@ -317,7 +316,7 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
       {showSelfQR && selfApp && (
         <SelfVerifyModal
           selfApp={selfApp}
-          qrUrl={selfQRUrl}
+          //qrUrl={selfQRUrl}
           onSuccess={async () => {
             setShowSelfQR(false)
             if (sessionId) {

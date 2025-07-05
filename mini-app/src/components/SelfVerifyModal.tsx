@@ -4,7 +4,7 @@ import { SelfQRcode } from '@selfxyz/qrcode'
 
 interface SelfVerifyModalProps {
   selfApp: any
-  qrUrl: string
+  //qrUrl: string
   onSuccess: () => void
   onError: () => void
   onClose: () => void
@@ -12,7 +12,7 @@ interface SelfVerifyModalProps {
 
 export const SelfVerifyModal: React.FC<SelfVerifyModalProps> = ({
   selfApp,
-  qrUrl,
+  //qrUrl,
   onSuccess,
   onError,
   onClose
@@ -46,9 +46,9 @@ export const SelfVerifyModal: React.FC<SelfVerifyModalProps> = ({
         size={250}
       />
       <p style={{ color: 'black' }}>Or use the link on your mobile:</p>
-      <a href={qrUrl} target='_blank' rel='noopener noreferrer'>
+      {/*<a href={qrUrl} target='_blank' rel='noopener noreferrer'>
         <Button>Verify on Mobile</Button>
-      </a>
+      </a>*/}
       <Button onClick={onClose} variant='secondary'>
         Close
       </Button>
