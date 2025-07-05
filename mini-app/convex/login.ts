@@ -153,6 +153,24 @@ export const updateUserProfile = mutation({
   }
 })
 
+export const updateUserVerificationLevelToDevice = mutation({
+  args: {
+    sessionId: v.string()
+  },
+  handler: async (ctx, args) => {
+    const user = await getAuthenticatedUser(ctx, args.sessionId)
+    if (!user) {
+      throw new ConvexError(
+        'User not authenticated for updating verification level.'
+      )
+    }
+
+    await ctx.db.patch(user._id, {
+      verification_level: 'device'
+    })
+  }
+})
+
 export const clearExpiredSessions = internalMutation({
   handler: async (ctx) => {
     const now = Date.now()

@@ -47,6 +47,9 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
   const { user, sessionId } = useSession()
   const pixels = useQuery(api.entity.pixel.list)
   const placePixel = useMutation(api.entity.pixel.placePixel)
+  const updateUserVerification = useMutation(
+    api.login.updateUserVerificationLevelToDevice
+  )
   const [isPlacing, setIsPlacing] = useState(false)
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [selectedPixel, setSelectedPixel] = useState<{
@@ -315,11 +318,16 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
         <SelfVerifyModal
           selfApp={selfApp}
           qrUrl={selfQRUrl}
-          onSuccess={() => {
+          onSuccess={async () => {
             setShowSelfQR(false)
-            toast.success(
-              'Verification in progress! Please check your Self app.'
-            )
+            if (sessionId) {
+              await updateUserVerification({ sessionId: sessionId })
+              toast.success(
+                'Verification successful! You can now place a pixel.'
+              )
+            } else {
+              toast.error('Session not found.')
+            }
           }}
           onError={() => {
             toast.error('Verification failed')
