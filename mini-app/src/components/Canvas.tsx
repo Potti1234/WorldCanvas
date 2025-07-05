@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { VerificationLevel } from '@worldcoin/minikit-js'
 import { useMutation, useQuery } from 'convex/react'
 import { api } from '../../convex/_generated/api'
+import { PixelInfoCard } from './PixelInfoCard'
 
 const COLORS = [
   '#FFFFFF',
@@ -48,6 +49,8 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
   } | null>(null)
   const [selectedColor, setSelectedColor] = useState<string>(COLORS[0])
   const [cooldown, setCooldown] = useState(0)
+  const [showPixelInfo, setShowPixelInfo] = useState<any | null>(null)
+  const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 })
 
   useEffect(() => {
     const updateCooldown = () => {
@@ -146,7 +149,7 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
     if (!canvas) return
 
     const handleCanvasClick = (e: MouseEvent) => {
-      if (!isPlacing || scale <= 5 || !canvas) return
+      if (scale <= 5 || !canvas) return
 
       const rect = canvas.getBoundingClientRect()
       const mouseX = e.clientX - rect.left
@@ -155,10 +158,24 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
       const canvasX = Math.floor((mouseX - pan.x) / scale)
       const canvasY = Math.floor((mouseY - pan.y) / scale)
 
-      if (canvasX >= 0 && canvasX < size && canvasY >= 0 && canvasY < size) {
+      if (canvasX < 0 || canvasX >= size || canvasY < 0 || canvasY >= size) {
+        return
+      }
+
+      if (isPlacing) {
         setSelectedPixel({ x: canvasX, y: canvasY })
         setShowColorPicker(true)
         setIsPlacing(false)
+      } else {
+        const clickedPixel = pixels?.find(
+          p => p.x === canvasX && p.y === canvasY
+        )
+        if (clickedPixel && clickedPixel.user) {
+          setShowPixelInfo(clickedPixel)
+          setPopupPosition({ x: e.clientX, y: e.clientY })
+        } else {
+          setShowPixelInfo(null)
+        }
       }
     }
 
@@ -166,7 +183,7 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
     return () => {
       canvas.removeEventListener('click', handleCanvasClick)
     }
-  }, [isPlacing, pan, scale, size])
+  }, [isPlacing, pan, scale, size, pixels, showColorPicker])
 
   const handlePlacePixel = async () => {
     if (selectedPixel && sessionId) {
@@ -249,6 +266,21 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
           onConfirm={handlePlacePixel}
           onCancel={handleCancelPlacement}
         />
+      )}
+      {showPixelInfo && (
+        <div
+          style={{
+            position: 'absolute',
+            top: popupPosition.y + 10,
+            left: popupPosition.x + 10,
+            zIndex: 20
+          }}
+        >
+          <PixelInfoCard
+            pixelData={showPixelInfo}
+            onClose={() => setShowPixelInfo(null)}
+          />
+        </div>
       )}
     </div>
   )

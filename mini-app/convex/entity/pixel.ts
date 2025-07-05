@@ -51,6 +51,27 @@ export const placePixel = mutation({
 
 export const list = query({
   handler: async ctx => {
-    return await ctx.db.query('pixels').collect()
+    const pixels = await ctx.db.query('pixels').collect()
+    const userIds = [...new Set(pixels.map(p => p.userId))]
+    const users = await Promise.all(userIds.map(userId => ctx.db.get(userId)))
+    const userMap = new Map()
+    users.forEach(user => {
+      if (user) {
+        userMap.set(user._id, user)
+      }
+    })
+
+    return pixels.map(pixel => {
+      const user = userMap.get(pixel.userId)
+      return {
+        ...pixel,
+        user: user
+          ? {
+              username: user.username,
+              profile_picture_url: user.profile_picture_url
+            }
+          : null
+      }
+    })
   }
 })
