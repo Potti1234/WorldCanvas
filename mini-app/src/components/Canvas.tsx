@@ -6,6 +6,8 @@ import { useSession } from '@/hooks/useSession'
 import { handleVerify } from '@/lib/worldcoin'
 import { toast } from 'sonner'
 import { VerificationLevel } from '@worldcoin/minikit-js'
+import { useMutation, useQuery } from 'convex/react'
+import { api } from '../../convex/_generated/api'
 
 const COLORS = [
   '#FFFFFF',
@@ -34,7 +36,8 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const { pan, scale } = useCanvasControls(size, canvasRef)
   const { user, sessionId } = useSession()
-  const [pixels, setPixels] = useState<Map<string, string>>(new Map())
+  const pixels = useQuery(api.entity.pixel.list)
+  const placePixel = useMutation(api.entity.pixel.placePixel)
   const [isPlacing, setIsPlacing] = useState(false)
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [selectedPixel, setSelectedPixel] = useState<{
@@ -94,11 +97,12 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
         }
       }
 
-      pixels.forEach((color, key) => {
-        const [x, y] = key.split(',').map(Number)
-        ctx.fillStyle = color
-        ctx.fillRect(x, y, 1, 1)
-      })
+      if (pixels) {
+        pixels.forEach(pixel => {
+          ctx.fillStyle = pixel.color
+          ctx.fillRect(pixel.x, pixel.y, 1, 1)
+        })
+      }
 
       if (showColorPicker && selectedPixel) {
         ctx.fillStyle = selectedColor
@@ -140,13 +144,21 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
     }
   }, [isPlacing, pan, scale, size])
 
-  const handlePlacePixel = () => {
-    if (selectedPixel) {
-      const newPixels = new Map(pixels)
-      newPixels.set(`${selectedPixel.x},${selectedPixel.y}`, selectedColor)
-      setPixels(newPixels)
-      setShowColorPicker(false)
-      setSelectedPixel(null)
+  const handlePlacePixel = async () => {
+    if (selectedPixel && sessionId) {
+      try {
+        await placePixel({
+          x: selectedPixel.x,
+          y: selectedPixel.y,
+          color: selectedColor,
+          sessionId: sessionId
+        })
+        setShowColorPicker(false)
+        setSelectedPixel(null)
+      } catch (error) {
+        toast.error('Failed to place pixel.')
+        console.error(error)
+      }
     }
   }
 
