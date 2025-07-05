@@ -15,6 +15,7 @@ function LoginComponent () {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const updateUserProfile = useMutation(api.login.updateUserProfile)
+  const signInRonin = useMutation(api.login.signInRonin)
   const { setSessionId } = useSession()
   const [isInsideWorldcoinApp, setIsInsideWorldcoinApp] = useState(false)
 
@@ -55,6 +56,25 @@ function LoginComponent () {
     }
   }
 
+  const handleRoninSignInComplete = async (data: {
+    address?: string
+    chainId: number
+    connectorId?: string
+  }) => {
+    if (data.address) {
+      try {
+        const { sessionId } = await signInRonin({ address: data.address })
+        setSessionId(sessionId)
+        void router.navigate({ to: '/' })
+      } catch (e) {
+        console.error('Failed to sign in with Ronin', e)
+        setError('Failed to sign in. Please try again.')
+      }
+    } else {
+      setError('Login failed: No address found. Please try again.')
+    }
+  }
+
   return (
     <div
       className='min-h-screen bg-cover bg-center flex items-end justify-center p-4 pb-10'
@@ -65,7 +85,7 @@ function LoginComponent () {
           {isInsideWorldcoinApp ? (
             <WalletAuthButton onSignInComplete={handleSignInComplete} />
           ) : (
-            <TantoConnectButton />
+            <TantoConnectButton onConnect={handleRoninSignInComplete} />
           )}
         </div>
         {error && (

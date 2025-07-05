@@ -8,6 +8,7 @@ import { v } from "convex/values";
 export default defineSchema({
   users: defineTable({
     walletAddress: v.string(),
+    chain: v.optional(v.union(v.literal('World'), v.literal('Ronin'))),
     verification_level: v.optional(v.string()),
     username: v.optional(v.string()),
     profile_picture_url: v.optional(v.string()),

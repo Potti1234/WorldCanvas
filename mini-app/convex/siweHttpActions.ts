@@ -69,7 +69,10 @@ export const completeSiwe = httpAction(async (ctx, request) => {
       })
     }
 
-    const user = await ctx.runMutation(internal.login.getOrCreateUser, { address: payload.address })
+    const user = await ctx.runMutation(internal.login.getOrCreateUser, {
+      address: payload.address,
+      chain: 'World'
+    })
 
     if (!user) {
       return new Response(JSON.stringify({ status: 'error', isValid: false, message: 'Could not get or create user' }), {

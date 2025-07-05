@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query, internalMutation, internalQuery, mutation } from "./_generated/server";
 import { ConvexError } from 'convex/values'
+import { internal } from './_generated/api'
 
 // Write your Convex functions in any file inside this directory (`convex`).
 // See https://docs.convex.dev/functions for more.
@@ -60,24 +61,31 @@ export const deleteNonce = internalMutation({
 })
 
 export const getOrCreateUser = internalMutation({
-  args: { address: v.string() },
-  handler: async (ctx, { address }) => {
+  args: {
+    address: v.string(),
+    chain: v.union(v.literal('World'), v.literal('Ronin'))
+  },
+  handler: async (ctx, { address, chain }) => {
     const user = await ctx.db
       .query('users')
-      .withIndex('by_walletAddress', (q) => q.eq('walletAddress', address))
+      .withIndex('by_walletAddress', q => q.eq('walletAddress', address))
       .unique()
 
     if (user) {
-      return user
+      if (!user.chain) {
+        await ctx.db.patch(user._id, { chain: chain })
+      }
+      return await ctx.db.get(user._id)
     }
 
     const newUserId = await ctx.db.insert('users', {
       walletAddress: address,
       verification_level: 'none',
+      chain: chain
     })
 
     return await ctx.db.get(newUserId)
-  },
+  }
 })
 
 export const createSession = internalMutation({
@@ -156,5 +164,28 @@ export const clearExpiredSessions = internalMutation({
     for (const session of expiredSessions) {
       await ctx.db.delete(session._id)
     }
+  }
+})
+
+export const signInRonin = mutation({
+  args: { address: v.string() },
+  handler: async (ctx, { address }) => {
+    const user = await ctx.runMutation(internal.login.getOrCreateUser, {
+      address,
+      chain: 'Ronin'
+    })
+
+    if (!user) {
+      throw new ConvexError('Could not get or create user for Ronin login')
+    }
+
+    const sessionId = crypto.randomUUID()
+    await ctx.runMutation(internal.login.createSession, {
+      userId: user._id,
+      sessionId: sessionId,
+      expiration: Date.now() + 24 * 60 * 60 * 1000 // 1 day
+    })
+
+    return { sessionId }
   }
 })
