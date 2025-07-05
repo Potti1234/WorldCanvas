@@ -4,8 +4,11 @@ export const useCanvasControls = (
   size: number,
   canvasRef: RefObject<HTMLCanvasElement | null>
 ) => {
-  const [pan, setPan] = useState({ x: 0, y: 0 })
   const [scale, setScale] = useState(0.5)
+  const [pan, setPan] = useState(() => ({
+    x: (window.innerWidth - size * 0.5) / 2,
+    y: (window.innerHeight - size * 0.5) / 2
+  }))
   const [isPanning, setIsPanning] = useState(false)
   const [startPan, setStartPan] = useState({ x: 0, y: 0 })
   const [isPinching, setIsPinching] = useState(false)
