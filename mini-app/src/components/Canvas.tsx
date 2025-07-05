@@ -10,6 +10,7 @@ import { useMutation, useQuery } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { PixelInfoCard } from './PixelInfoCard'
 import { getContrastColor } from '@/lib/color'
+import { placePixelOnContract } from '@/lib/transactions/placepixel'
 
 const COLORS = [
   '#FFFFFF',
@@ -215,18 +216,27 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
 
   const handlePlacePixel = async () => {
     if (selectedPixel && sessionId) {
-      try {
-        await placePixel({
-          x: selectedPixel.x,
-          y: selectedPixel.y,
-          color: selectedColor,
-          sessionId: sessionId
-        })
-        setShowColorPicker(false)
-        setSelectedPixel(null)
-      } catch (error) {
+      const status = await placePixelOnContract(
+        selectedPixel.x,
+        selectedPixel.y,
+        selectedColor
+      )
+      console.log(status)
+      if (status === 'success') {
+        try {
+          await placePixel({
+            x: selectedPixel.x,
+            y: selectedPixel.y,
+            color: selectedColor,
+            sessionId: sessionId
+          })
+          setShowColorPicker(false)
+          setSelectedPixel(null)
+        } catch (error) {
+          toast.error('Failed to place pixel.')
+        }
+      } else {
         toast.error('Failed to place pixel.')
-        console.error(error)
       }
     }
   }
