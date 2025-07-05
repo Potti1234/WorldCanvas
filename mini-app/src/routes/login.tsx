@@ -50,10 +50,20 @@ function LoginComponent () {
   }
 
   return (
-    <div className='p-8 flex flex-col gap-16 items-center justify-center min-h-screen'>
-      <h1 className='text-4xl font-bold text-center'>Login</h1>
-      <WalletAuthButton onSignInComplete={handleSignInComplete} />
-      {error && <p className='text-red-500'>{error}</p>}
+    <div
+      className='min-h-screen bg-cover bg-center flex items-end justify-center p-4 pb-10'
+      style={{ backgroundImage: "url('/LoginBackground.png')" }}
+    >
+      <div className='w-full max-w-xs p-6 space-y-6 bg-white/30 backdrop-blur-md rounded-2xl shadow-lg'>
+        <div className='flex justify-center'>
+          <WalletAuthButton onSignInComplete={handleSignInComplete} />
+        </div>
+        {error && (
+          <p className='text-red-500 bg-red-100 p-3 rounded-lg text-center'>
+            {error}
+          </p>
+        )}
+      </div>
     </div>
   )
 }
