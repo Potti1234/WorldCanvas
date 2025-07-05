@@ -9,6 +9,7 @@ import { VerificationLevel } from '@worldcoin/minikit-js'
 import { useMutation, useQuery } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { PixelInfoCard } from './PixelInfoCard'
+import { getContrastColor } from '@/lib/color'
 
 const COLORS = [
   '#FFFFFF',
@@ -131,7 +132,25 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
         })
       }
 
+      if (showPixelInfo) {
+        const contrastColor = getContrastColor(showPixelInfo.color)
+        ctx.strokeStyle = contrastColor
+        ctx.lineWidth = 2 / scale
+        ctx.strokeRect(showPixelInfo.x, showPixelInfo.y, 1, 1)
+      }
+
       if (showColorPicker && selectedPixel) {
+        const underlyingPixel = pixels?.find(
+          p => p.x === selectedPixel.x && p.y === selectedPixel.y
+        )
+        const contrastColor = getContrastColor(
+          underlyingPixel?.color || '#FFFFFF'
+        )
+
+        ctx.strokeStyle = contrastColor
+        ctx.lineWidth = 2 / scale
+        ctx.strokeRect(selectedPixel.x, selectedPixel.y, 1, 1)
+
         ctx.fillStyle = selectedColor
         ctx.globalAlpha = 0.7
         ctx.fillRect(selectedPixel.x, selectedPixel.y, 1, 1)
@@ -142,7 +161,16 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
     }
 
     draw()
-  }, [size, scale, pan, pixels, showColorPicker, selectedPixel, selectedColor])
+  }, [
+    size,
+    scale,
+    pan,
+    pixels,
+    showColorPicker,
+    selectedPixel,
+    selectedColor,
+    showPixelInfo
+  ])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -163,6 +191,7 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
       }
 
       if (isPlacing) {
+        setShowPixelInfo(null)
         setSelectedPixel({ x: canvasX, y: canvasY })
         setShowColorPicker(true)
         setIsPlacing(false)
