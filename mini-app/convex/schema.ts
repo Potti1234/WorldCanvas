@@ -11,6 +11,7 @@ export default defineSchema({
     verification_level: v.optional(v.string()),
     username: v.optional(v.string()),
     profile_picture_url: v.optional(v.string()),
+    lastPlaced: v.optional(v.number())
   }).index('by_walletAddress', ['walletAddress']),
   sessions: defineTable({
     userId: v.id('users'),

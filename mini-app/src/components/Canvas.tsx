@@ -33,6 +33,8 @@ interface CanvasProps {
 }
 
 const Canvas: React.FC<CanvasProps> = ({ size }) => {
+  const PIXEL_COOLDOWN = 5 * 1000
+
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const { pan, scale } = useCanvasControls(size, canvasRef)
   const { user, sessionId } = useSession()
@@ -45,6 +47,28 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
     y: number
   } | null>(null)
   const [selectedColor, setSelectedColor] = useState<string>(COLORS[0])
+  const [cooldown, setCooldown] = useState(0)
+
+  useEffect(() => {
+    const updateCooldown = () => {
+      if (!user?.lastPlaced) {
+        setCooldown(0)
+        return
+      }
+      const now = Date.now()
+      const diff = now - user.lastPlaced
+      const secondsLeft = Math.ceil((PIXEL_COOLDOWN - diff) / 1000)
+      if (secondsLeft <= 0) {
+        setCooldown(0)
+      } else {
+        setCooldown(secondsLeft)
+      }
+    }
+
+    updateCooldown()
+    const interval = setInterval(updateCooldown, 1000)
+    return () => clearInterval(interval)
+  }, [user?.lastPlaced])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -206,7 +230,9 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
         }}
       >
         {!isPlacing && !showColorPicker && (
-          <Button onClick={handleEnterPlacementMode}>Place Pixel</Button>
+          <Button onClick={handleEnterPlacementMode} disabled={cooldown > 0}>
+            {cooldown > 0 ? `Next pixel in 00:0${cooldown}` : 'Place Pixel'}
+          </Button>
         )}
         {isPlacing && (
           <Button onClick={() => setIsPlacing(false)} variant='destructive'>

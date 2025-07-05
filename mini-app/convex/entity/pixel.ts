@@ -2,6 +2,8 @@ import { mutation, query } from '../_generated/server'
 import { v } from 'convex/values'
 import { getAuthenticatedUser } from '../login'
 
+const PIXEL_COOLDOWN = 5 * 1000 // 5 seconds
+
 export const placePixel = mutation({
   args: {
     x: v.number(),
@@ -14,6 +16,10 @@ export const placePixel = mutation({
 
     if (!user) {
       throw new Error('You must be logged in to place a pixel.')
+    }
+
+    if (user.lastPlaced && Date.now() - user.lastPlaced < PIXEL_COOLDOWN) {
+      throw new Error('You must wait 5 seconds between placing pixels.')
     }
 
     if (
@@ -38,6 +44,8 @@ export const placePixel = mutation({
         userId: user._id
       })
     }
+
+    await ctx.db.patch(user._id, { lastPlaced: Date.now() })
   }
 })
 
