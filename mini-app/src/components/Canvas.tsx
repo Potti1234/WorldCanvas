@@ -152,7 +152,6 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
         ctx.strokeRect(selectedPixel.x, selectedPixel.y, 1, 1)
 
         ctx.fillStyle = selectedColor
-        ctx.globalAlpha = 0.7
         ctx.fillRect(selectedPixel.x, selectedPixel.y, 1, 1)
         ctx.globalAlpha = 1.0
       }
