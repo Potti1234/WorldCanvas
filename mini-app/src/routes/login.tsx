@@ -1,10 +1,11 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { WalletAuthButton } from '@/components/WalletAuthButton'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { MiniKit } from '@worldcoin/minikit-js'
 import { useMutation } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { useSession } from '@/hooks/useSession'
+import { TantoConnectButton } from '@sky-mavis/tanto-widget'
 
 export const Route = createFileRoute('/login')({
   component: LoginComponent
@@ -15,6 +16,11 @@ function LoginComponent () {
   const [error, setError] = useState<string | null>(null)
   const updateUserProfile = useMutation(api.login.updateUserProfile)
   const { setSessionId } = useSession()
+  const [isInsideWorldcoinApp, setIsInsideWorldcoinApp] = useState(false)
+
+  useEffect(() => {
+    setIsInsideWorldcoinApp(MiniKit.isInstalled())
+  }, [])
 
   const handleSignInComplete = async ({
     isValid,
@@ -56,7 +62,11 @@ function LoginComponent () {
     >
       <div className='w-full max-w-xs p-6 space-y-6 bg-white/30 backdrop-blur-md rounded-2xl shadow-lg'>
         <div className='flex justify-center'>
-          <WalletAuthButton onSignInComplete={handleSignInComplete} />
+          {isInsideWorldcoinApp ? (
+            <WalletAuthButton onSignInComplete={handleSignInComplete} />
+          ) : (
+            <TantoConnectButton />
+          )}
         </div>
         {error && (
           <p className='text-red-500 bg-red-100 p-3 rounded-lg text-center'>
