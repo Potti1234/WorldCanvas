@@ -21,5 +21,5 @@ function RouteComponent () {
     return <div>Loading...</div>
   }
 
-  return <Canvas size={500} />
+  return <Canvas size={100} />
 }
