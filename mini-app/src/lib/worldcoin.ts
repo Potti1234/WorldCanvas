@@ -15,14 +15,14 @@ import { api } from '../../convex/_generated/api'
  */
 export const handleVerify = async (
   sessionId: string,
-  verification_level: VerificationLevel = VerificationLevel.Orb
+  verification_level: VerificationLevel = VerificationLevel.Device
 ) => {
   if (!MiniKit.isInstalled()) {
     console.log('MiniKit not installed')
     return
   }
 
-  const action = 'stream-verification'
+  const action = 'canvas-verification'
   const signal = ''
 
   const verifyPayload = {

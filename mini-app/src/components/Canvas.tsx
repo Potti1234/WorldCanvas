@@ -2,6 +2,10 @@ import React, { useRef, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useCanvasControls } from '@/hooks/useCanvasControls'
 import { ColorPicker } from './ColorPicker'
+import { useSession } from '@/hooks/useSession'
+import { handleVerify } from '@/lib/worldcoin'
+import { toast } from 'sonner'
+import { VerificationLevel } from '@worldcoin/minikit-js'
 
 const COLORS = [
   '#FFFFFF',
@@ -29,6 +33,7 @@ interface CanvasProps {
 const Canvas: React.FC<CanvasProps> = ({ size }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const { pan, scale } = useCanvasControls(size, canvasRef)
+  const { user, sessionId } = useSession()
   const [pixels, setPixels] = useState<Map<string, string>>(new Map())
   const [isPlacing, setIsPlacing] = useState(false)
   const [showColorPicker, setShowColorPicker] = useState(false)
@@ -150,6 +155,25 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
     setSelectedPixel(null)
   }
 
+  const handleEnterPlacementMode = async () => {
+    if (!user || !sessionId) return
+
+    if (
+      user.verification_level === VerificationLevel.Device ||
+      user.verification_level === VerificationLevel.Orb
+    ) {
+      setIsPlacing(true)
+    } else {
+      try {
+        await handleVerify(sessionId)
+        toast.success('Verification successful')
+      } catch (error) {
+        console.error('Verification failed:', error)
+        toast.error('Verification failed')
+      }
+    }
+  }
+
   return (
     <div
       style={{
@@ -170,7 +194,7 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
         }}
       >
         {!isPlacing && !showColorPicker && (
-          <Button onClick={() => setIsPlacing(true)}>Place Pixel</Button>
+          <Button onClick={handleEnterPlacementMode}>Place Pixel</Button>
         )}
         {isPlacing && (
           <Button onClick={() => setIsPlacing(false)} variant='destructive'>
