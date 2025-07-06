@@ -33,7 +33,9 @@ export function Leaderboard () {
                 leaderboardData.map((entry, index) => (
                   <TableRow key={entry.userId}>
                     <TableCell className='font-medium'>{index + 1}</TableCell>
-                    <TableCell>{entry.username}</TableCell>
+                    <TableCell className='max-w-[120px] truncate'>
+                      {entry.username}
+                    </TableCell>
                     <TableCell className='text-right'>
                       {entry.pixelCount}
                     </TableCell>
