@@ -418,10 +418,16 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
             <Chat />
           </DrawerContent>
         </Drawer>
-        {!isPlacing && !showColorPicker && (
-          <Button onClick={handleEnterPlacementMode} disabled={cooldown > 0}>
-            {cooldown > 0 ? `Next pixel in 00:0${cooldown}` : 'Place Pixel'}
+        {isPlacing ? (
+          <Button onClick={() => setIsPlacing(false)} variant='destructive'>
+            Cancel Pixel Placing
           </Button>
+        ) : (
+          !showColorPicker && (
+            <Button onClick={handleEnterPlacementMode} disabled={cooldown > 0}>
+              {cooldown > 0 ? `Next pixel in 00:0${cooldown}` : 'Place Pixel'}
+            </Button>
+          )
         )}
         <Drawer>
           <DrawerTrigger asChild>
@@ -433,11 +439,6 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
             <Leaderboard />
           </DrawerContent>
         </Drawer>
-        {isPlacing && (
-          <Button onClick={() => setIsPlacing(false)} variant='destructive'>
-            Cancel Pixel Placing
-          </Button>
-        )}
       </div>
 
       {showColorPicker && selectedPixel && (
