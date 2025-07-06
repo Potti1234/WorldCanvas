@@ -14,6 +14,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as ProfileImport } from './routes/profile'
 import { Route as NotFoundImport } from './routes/not-found'
 import { Route as LoginImport } from './routes/login'
+import { Route as LeaderboardImport } from './routes/leaderboard'
 import { Route as ErrorImport } from './routes/error'
 import { Route as IndexImport } from './routes/index'
 
@@ -34,6 +35,12 @@ const NotFoundRoute = NotFoundImport.update({
 const LoginRoute = LoginImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const LeaderboardRoute = LeaderboardImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -67,6 +74,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ErrorImport
       parentRoute: typeof rootRoute
     }
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardImport
+      parentRoute: typeof rootRoute
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -96,6 +110,7 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/error': typeof ErrorRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
   '/not-found': typeof NotFoundRoute
   '/profile': typeof ProfileRoute
@@ -104,6 +119,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/error': typeof ErrorRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
   '/not-found': typeof NotFoundRoute
   '/profile': typeof ProfileRoute
@@ -113,6 +129,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/error': typeof ErrorRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
   '/not-found': typeof NotFoundRoute
   '/profile': typeof ProfileRoute
@@ -120,16 +137,30 @@ export interface FileRoutesById {
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/error' | '/login' | '/not-found' | '/profile'
+  fullPaths:
+    | '/'
+    | '/error'
+    | '/leaderboard'
+    | '/login'
+    | '/not-found'
+    | '/profile'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/error' | '/login' | '/not-found' | '/profile'
-  id: '__root__' | '/' | '/error' | '/login' | '/not-found' | '/profile'
+  to: '/' | '/error' | '/leaderboard' | '/login' | '/not-found' | '/profile'
+  id:
+    | '__root__'
+    | '/'
+    | '/error'
+    | '/leaderboard'
+    | '/login'
+    | '/not-found'
+    | '/profile'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ErrorRoute: typeof ErrorRoute
+  LeaderboardRoute: typeof LeaderboardRoute
   LoginRoute: typeof LoginRoute
   NotFoundRoute: typeof NotFoundRoute
   ProfileRoute: typeof ProfileRoute
@@ -138,6 +169,7 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ErrorRoute: ErrorRoute,
+  LeaderboardRoute: LeaderboardRoute,
   LoginRoute: LoginRoute,
   NotFoundRoute: NotFoundRoute,
   ProfileRoute: ProfileRoute,
@@ -155,6 +187,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/error",
+        "/leaderboard",
         "/login",
         "/not-found",
         "/profile"
@@ -165,6 +198,9 @@ export const routeTree = rootRoute
     },
     "/error": {
       "filePath": "error.tsx"
+    },
+    "/leaderboard": {
+      "filePath": "leaderboard.tsx"
     },
     "/login": {
       "filePath": "login.tsx"

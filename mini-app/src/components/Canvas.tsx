@@ -14,6 +14,7 @@ import { usePlacePixelOnContract } from '@/lib/transactions/placepixel'
 import { MiniKit } from '@worldcoin/minikit-js'
 import { SelfAppBuilder } from '@selfxyz/qrcode'
 import { SelfVerifyModal } from './SelfVerifyModal'
+import { Link } from '@tanstack/react-router'
 
 const COLORS = [
   '#FFFFFF',
@@ -371,6 +372,18 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
         overflow: 'hidden'
       }}
     >
+      <div
+        style={{
+          position: 'absolute',
+          top: '20px',
+          right: '20px',
+          zIndex: 10
+        }}
+      >
+        <Link to='/leaderboard'>
+          <Button variant='outline'>Leaderboard</Button>
+        </Link>
+      </div>
       <canvas ref={canvasRef} style={{ display: 'block' }} />
       {showSelfQR && selfApp && (
         <SelfVerifyModal
