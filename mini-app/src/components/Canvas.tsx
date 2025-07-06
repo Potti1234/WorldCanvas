@@ -15,6 +15,9 @@ import { MiniKit } from '@worldcoin/minikit-js'
 import { SelfAppBuilder } from '@selfxyz/qrcode'
 import { SelfVerifyModal } from './SelfVerifyModal'
 import { Link } from '@tanstack/react-router'
+import { MessageSquare } from 'lucide-react'
+import { Chat } from './Chat'
+import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
 
 const COLORS = [
   '#FFFFFF',
@@ -372,19 +375,31 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
         overflow: 'hidden'
       }}
     >
+      <canvas ref={canvasRef} style={{ display: 'block' }} />
       <div
         style={{
           position: 'absolute',
           top: '20px',
           right: '20px',
-          zIndex: 10
+          zIndex: 30,
+          display: 'flex',
+          gap: '10px'
         }}
       >
+        <Drawer>
+          <DrawerTrigger asChild>
+            <Button variant='outline'>
+              <MessageSquare />
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent className='h-3/4'>
+            <Chat />
+          </DrawerContent>
+        </Drawer>
         <Link to='/leaderboard'>
           <Button variant='outline'>Leaderboard</Button>
         </Link>
       </div>
-      <canvas ref={canvasRef} style={{ display: 'block' }} />
       {showSelfQR && selfApp && (
         <SelfVerifyModal
           selfApp={selfApp}

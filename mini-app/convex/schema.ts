@@ -40,5 +40,9 @@ export default defineSchema({
     y: v.number(),
     color: v.string(),
     userId: v.id('users')
-  }).index('by_pos', ['x', 'y'])
+  }).index('by_pos', ['x', 'y']),
+  messages: defineTable({
+    userId: v.id("users"),
+    text: v.string(),
+  })
 });
