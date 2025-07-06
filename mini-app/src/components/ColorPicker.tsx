@@ -31,7 +31,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 20,
-        width: '250px'
+        width: '300px'
       }}
     >
       <CardHeader>
@@ -41,7 +41,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateColumns: 'repeat(6, 1fr)',
             gap: '10px'
           }}
         >

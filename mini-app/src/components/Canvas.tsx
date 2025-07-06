@@ -21,21 +21,35 @@ import { Leaderboard } from './Leaderboard'
 
 const COLORS = [
   '#FFFFFF',
-  '#C2C2C2',
-  '#858585',
-  '#474747',
+  '#F0F8FF',
+  '#E6E6FA',
+  '#C0C0C0',
+  '#666666',
   '#000000',
-  '#362B23',
-  '#7A4F33',
-  '#E6A824',
-  '#F3D49C',
-  '#F8C3B8',
-  '#E64A3E',
-  '#9C273E',
-  '#6A329C',
-  '#32329C',
-  '#3E4A9C',
-  '#279C9C'
+  '#FFE4E1',
+  '#FFC0CB',
+  '#FFB6C1',
+  '#FF80ED',
+  '#9400D3', // DarkViolet
+  '#FF7373',
+  '#FA8072',
+  '#FF0000',
+  '#A0522D', // Sienna
+  '#FFA500',
+  '#FFD700',
+  '#FFFF00',
+  '#D3FFCE',
+  '#BADA55',
+  '#40E0D0',
+  '#008080',
+  '#065535',
+  '#C6E2FF',
+  '#B0E0E6',
+  '#00FFFF',
+  '#003366',
+  '#133337',
+  '#0000FF',
+  '#FAEBD7'
 ]
 
 interface CanvasProps {
