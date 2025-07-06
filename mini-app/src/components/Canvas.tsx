@@ -10,7 +10,7 @@ import { useMutation, useQuery } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { PixelInfoCard } from './PixelInfoCard'
 import { getContrastColor } from '@/lib/color'
-import { placePixelOnContract } from '@/lib/transactions/placepixel'
+import { usePlacePixelOnContract } from '@/lib/transactions/placepixel'
 import { MiniKit } from '@worldcoin/minikit-js'
 import { SelfAppBuilder } from '@selfxyz/qrcode'
 import { SelfVerifyModal } from './SelfVerifyModal'
@@ -62,6 +62,34 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
   const [showSelfQR, setShowSelfQR] = useState(false)
   const [selfApp, setSelfApp] = useState<any>(null)
   //const [selfQRUrl, setSelfQRUrl] = useState('')
+  const {
+    placePixel: placePixelOnContract,
+    isSubmitting,
+    isConfirming
+  } = usePlacePixelOnContract(
+    async () => {
+      if (selectedPixel && sessionId) {
+        try {
+          await placePixel({
+            x: selectedPixel.x,
+            y: selectedPixel.y,
+            color: selectedColor,
+            sessionId: sessionId
+          })
+          setShowColorPicker(false)
+          setSelectedPixel(null)
+          toast.success('Pixel placed!')
+        } catch (error) {
+          toast.error(
+            'Transaction succeeded, but failed to update pixel in DB.'
+          )
+        }
+      }
+    },
+    error => {
+      toast.error(error.message)
+    }
+  )
 
   useEffect(() => {
     const updateCooldown = () => {
@@ -223,30 +251,22 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
     }
   }, [isPlacing, pan, scale, size, pixels, showColorPicker])
 
+  useEffect(() => {
+    if (isSubmitting) {
+      toast.info('Please approve the transaction in your wallet.')
+    }
+    if (isConfirming) {
+      toast.info('Transaction is being confirmed...')
+    }
+  }, [isSubmitting, isConfirming])
+
   const handlePlacePixel = async () => {
     if (selectedPixel && sessionId) {
-      const status = await placePixelOnContract(
+      await placePixelOnContract(
         selectedPixel.x,
         selectedPixel.y,
         selectedColor
       )
-      console.log(status)
-      if (status === 'success') {
-        try {
-          await placePixel({
-            x: selectedPixel.x,
-            y: selectedPixel.y,
-            color: selectedColor,
-            sessionId: sessionId
-          })
-          setShowColorPicker(false)
-          setSelectedPixel(null)
-        } catch (error) {
-          toast.error('Failed to place pixel.')
-        }
-      } else {
-        toast.error('Failed to place pixel.')
-      }
     }
   }
 
@@ -360,7 +380,7 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
           colors={COLORS}
           selectedColor={selectedColor}
           onSelectColor={setSelectedColor}
-          onConfirm={handlePlacePixel}
+          onConfirm={isSubmitting || isConfirming ? () => {} : handlePlacePixel}
           onCancel={handleCancelPlacement}
         />
       )}

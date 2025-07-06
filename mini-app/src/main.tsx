@@ -14,7 +14,7 @@ import { convex } from './lib/convex.ts'
 import { getDefaultConfig, TantoProvider } from '@sky-mavis/tanto-widget'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WagmiProvider } from 'wagmi'
-import { ronin } from 'viem/chains'
+import { saigon } from 'viem/chains'
 
 const config = getDefaultConfig({
   appMetadata: {
@@ -35,7 +35,7 @@ const config = getDefaultConfig({
   coinbaseWalletConfig: {
     enable: true
   },
-  chains: [ronin]
+  chains: [saigon]
 })
 const queryClient = new QueryClient()
 
