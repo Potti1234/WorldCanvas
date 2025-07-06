@@ -42,7 +42,7 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
   const PIXEL_COOLDOWN = 5 * 1000
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const { pan, scale } = useCanvasControls(size, canvasRef)
+  const { pan, scale, setPan, setScale } = useCanvasControls(size, canvasRef)
   const { user, sessionId } = useSession()
   const pixels = useQuery(api.entity.pixel.list)
   const placePixel = useMutation(api.entity.pixel.placePixel)
@@ -90,6 +90,45 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
       toast.error(error.message)
     }
   )
+
+  useEffect(() => {
+    const targetScale = 6
+    const animationDuration = 2000 // 2 seconds
+    const initialScale = 0.1
+    let startTime: number | null = null
+
+    const animate = (currentTime: number) => {
+      if (!startTime) {
+        startTime = currentTime
+      }
+
+      const elapsedTime = currentTime - startTime
+      const progress = Math.min(elapsedTime / animationDuration, 1)
+
+      const easedProgress = 1 - Math.pow(1 - progress, 3) // easeOutCubic
+
+      const newScale =
+        initialScale + (targetScale - initialScale) * easedProgress
+
+      const newPan = {
+        x: (window.innerWidth - size * newScale) / 2,
+        y: (window.innerHeight - size * newScale) / 2
+      }
+
+      setScale(newScale)
+      setPan(newPan)
+
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      }
+    }
+
+    const animationFrameId = requestAnimationFrame(animate)
+
+    return () => {
+      cancelAnimationFrame(animationFrameId)
+    }
+  }, [setPan, setScale, size])
 
   useEffect(() => {
     const updateCooldown = () => {
