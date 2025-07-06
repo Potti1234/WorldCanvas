@@ -14,10 +14,10 @@ import { usePlacePixelOnContract } from '@/lib/transactions/placepixel'
 import { MiniKit } from '@worldcoin/minikit-js'
 import { SelfAppBuilder } from '@selfxyz/qrcode'
 import { SelfVerifyModal } from './SelfVerifyModal'
-import { Link } from '@tanstack/react-router'
-import { MessageSquare } from 'lucide-react'
+import { MessageSquare, Trophy } from 'lucide-react'
 import { Chat } from './Chat'
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
+import { Leaderboard } from './Leaderboard'
 
 const COLORS = [
   '#FFFFFF',
@@ -376,30 +376,6 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
       }}
     >
       <canvas ref={canvasRef} style={{ display: 'block' }} />
-      <div
-        style={{
-          position: 'absolute',
-          top: '20px',
-          right: '20px',
-          zIndex: 30,
-          display: 'flex',
-          gap: '10px'
-        }}
-      >
-        <Drawer>
-          <DrawerTrigger asChild>
-            <Button variant='outline'>
-              <MessageSquare />
-            </Button>
-          </DrawerTrigger>
-          <DrawerContent className='h-3/4'>
-            <Chat />
-          </DrawerContent>
-        </Drawer>
-        <Link to='/leaderboard'>
-          <Button variant='outline'>Leaderboard</Button>
-        </Link>
-      </div>
       {showSelfQR && selfApp && (
         <SelfVerifyModal
           selfApp={selfApp}
@@ -427,14 +403,36 @@ const Canvas: React.FC<CanvasProps> = ({ size }) => {
           bottom: '20px',
           left: '50%',
           transform: 'translateX(-50%)',
-          zIndex: 10
+          zIndex: 10,
+          display: 'flex',
+          gap: '10px'
         }}
       >
+        <Drawer>
+          <DrawerTrigger asChild>
+            <Button>
+              <MessageSquare />
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent className='h-3/4'>
+            <Chat />
+          </DrawerContent>
+        </Drawer>
         {!isPlacing && !showColorPicker && (
           <Button onClick={handleEnterPlacementMode} disabled={cooldown > 0}>
             {cooldown > 0 ? `Next pixel in 00:0${cooldown}` : 'Place Pixel'}
           </Button>
         )}
+        <Drawer>
+          <DrawerTrigger asChild>
+            <Button>
+              <Trophy />
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent className='h-3/4'>
+            <Leaderboard />
+          </DrawerContent>
+        </Drawer>
         {isPlacing && (
           <Button onClick={() => setIsPlacing(false)} variant='destructive'>
             Cancel Pixel Placing
