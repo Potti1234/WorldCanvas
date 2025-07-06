@@ -10,6 +10,11 @@ export const usePlacePixelOnContract = (
     const { data: hash, writeContractAsync, isPending: isSubmitting, error: submitError } = useWriteContract();
 
     const placePixel = async (x: number, y: number, color: string) => {
+        if (import.meta.env.VITE_DISABLE_TRANSACTION === 'true') {
+            console.log('Transactions disabled, skipping contract call.');
+            onSuccess?.({ status: 'success', simulated: true });
+            return;
+        }
         if (!MiniKit.isInstalled()) {
             const contractAddressRonin = '0xDB611E19303debA0C967A6f293E23Fc5D9D58513';
             await writeContractAsync({
